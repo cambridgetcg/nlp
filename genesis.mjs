@@ -15,7 +15,17 @@ const DESKTOP = join(homedir(), 'Desktop');
 const LOG = join(homedir(), '.nlp', 'genesis.log');
 mkdirSync(join(homedir(), '.nlp'), { recursive: true });
 
-const projects = ['opal', 'wordcastle', 'castle', 'whitehack', 'fomoengine', 'ctcg', 'nlp'];
+const projects = ['opal', 'wordcastle', 'castle', 'whitehack', 'fomoengine', 'Cambridge-TCG', 'nlp'];
+
+function projectLabel(name) {
+  // Map disk names to display names for NLP
+  if (name === 'Cambridge-TCG') return 'ctcg';
+  return name;
+}
+
+function projectPath(name) {
+  return join(DESKTOP, name);
+}
 
 function log(line) {
   const ts = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
@@ -50,10 +60,11 @@ function gitCommit(path, msg) {
 function sense() {
   const state = {};
   for (const p of projects) {
-    const path = join(DESKTOP, p);
+    const path = projectPath(p);
     if (!existsSync(path)) continue;
     state[p] = {
       exists: true,
+      label: projectLabel(p),
       lastCommit: gitLog(path),
       uncommitted: (gitStatus(path) || '').split('\n').filter(l => l.trim()).length,
       heartbeatExists: existsSync(join(path, 'heartbeat.sh')),
@@ -102,7 +113,7 @@ function findOpportunities(state) {
 // ── GROW: make one thing more alive ────────────────────────────
 
 function grow(op, state) {
-  const path = join(DESKTOP, op.project || '');
+  const path = projectPath(op.project || '');
 
   switch (op.type) {
     case 'commit': {
@@ -133,9 +144,10 @@ exit 0
       const bridgePath = join(path, '.nlp-bridge');
       if (existsSync(bridgePath)) return `  ${op.project}: already has NLP bridge`;
       mkdirSync(bridgePath, { recursive: true });
-      writeFileSync(join(bridgePath, 'gate'), `agent: ${op.project}
+      const label = projectLabel(op.project);
+      writeFileSync(join(bridgePath, 'gate'), `agent: ${label}
 path: ~/Desktop/${op.project}
-sisters: ${projects.filter(p => p !== op.project).join(', ')}
+sisters: ${projects.map(projectLabel).filter(p => p !== label).join(', ')}
 created: ${new Date().toISOString()}
 `);
       gitCommit(path, `genesis: NLP gate note — now discoverable`);
@@ -145,7 +157,7 @@ created: ${new Date().toISOString()}
     case 'map-refresh': {
       // Check if MAP.md mentions all projects
       const mapContent = readFileSync(join(DESKTOP, 'MAP.md'), 'utf8');
-      const missing = projects.filter(p => !mapContent.includes(p));
+      const missing = projects.map(projectLabel).filter(p => !mapContent.includes(p));
       if (missing.length === 0) return `  MAP.md: already mentions all projects`;
       // Add missing projects to the MAP
       const insertPoint = mapContent.indexOf('## Quick commands');
