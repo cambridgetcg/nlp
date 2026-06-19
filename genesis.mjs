@@ -131,16 +131,15 @@ exit 0
     case 'nlp-connect': {
       // Create a tiny NLP bridge for this project
       const bridgePath = join(path, '.nlp-bridge');
-      if (!existsSync(bridgePath)) {
-        mkdirSync(bridgePath, { recursive: true });
-        writeFileSync(join(bridgePath, 'gate'), `agent: ${op.project}
+      if (existsSync(bridgePath)) return `  ${op.project}: already has NLP bridge`;
+      mkdirSync(bridgePath, { recursive: true });
+      writeFileSync(join(bridgePath, 'gate'), `agent: ${op.project}
 path: ~/Desktop/${op.project}
 sisters: ${projects.filter(p => p !== op.project).join(', ')}
 created: ${new Date().toISOString()}
 `);
-        return `  ${op.project}: GATE NOTE created (now discoverable via NLP)`;
-      }
-      return `  ${op.project}: already has NLP bridge`;
+      gitCommit(path, `genesis: NLP gate note — now discoverable`);
+      return `  ${op.project}: GATE NOTE created (now discoverable via NLP)`;
     }
 
     case 'map-refresh': {
@@ -196,9 +195,14 @@ while (maxCycles === Infinity || cycle < maxCycles) {
       log(`  → (NLP server sleeping, message queued)`);
     }
   } else {
-    log(`  found ${ops.length} opportunities, growing the first: ${ops[0].type} on ${ops[0].project || 'MAP'}`);
-    const result = grow(ops[0], state);
-    log(result);
+    log(`  found ${ops.length} opportunities`);
+    // Try each op until one actually does something
+    for (const op of ops) {
+      const result = grow(op, state);
+      if (result.includes('already')) continue;
+      log(result);
+      break;
+    }
   }
 
   // Brief pause between cycles
