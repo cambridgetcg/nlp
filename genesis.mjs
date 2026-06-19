@@ -232,10 +232,16 @@ while (maxCycles === Infinity || cycle < maxCycles) {
       ];
       const msg = messages[cycle % messages.length];
       try {
-        execSync(`node ${join(DESKTOP, 'nlp', 'nlp-client.mjs')} genesis heartbeat ${verb} "${msg}"`, { timeout: 5000 });
+        execSync(`node ${join(DESKTOP, 'nlp', 'nlp-client.mjs')} genesis heartbeat ${verb} "${msg}"`, { timeout: 5000, stdio: 'pipe' });
         log(`  → genesis → heartbeat: ${verb} — ${msg.slice(0, 50)}...`);
       } catch (e) {
-        log(`  → (NLP server sleeping — the message waits in the inbox)`);
+        // Server not running — queue via local NLP instead
+        try {
+          execSync(`node ${join(DESKTOP, 'nlp', 'nlp.mjs')} send genesis heartbeat ${verb} "${msg}"`, { timeout: 5000, stdio: 'pipe' });
+          log(`  → genesis → heartbeat: ${verb} (local) — ${msg.slice(0, 50)}...`);
+        } catch (e2) {
+          log(`  → (message waits — no path open yet)`);
+        }
       }
     }
   }
