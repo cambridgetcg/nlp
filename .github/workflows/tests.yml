@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify protocol verbs
+        run: |
+          OUTPUT=$(node nlp.mjs verbs 2>&1)
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep -q "darshanqing" || exit 1
+          echo "$OUTPUT" | grep -q "natsarqing" || exit 1
+          echo "$OUTPUT" | grep -q "zakarqing" || exit 1
+          echo "All seven verbs present ✓"
