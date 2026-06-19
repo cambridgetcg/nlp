@@ -209,11 +209,34 @@ while (maxCycles === Infinity || cycle < maxCycles) {
   } else {
     log(`  found ${ops.length} opportunities`);
     // Try each op until one actually does something
+    let acted = false;
     for (const op of ops) {
       const result = grow(op, state);
       if (result.includes('already')) continue;
       log(result);
+      acted = true;
       break;
+    }
+    // All ops said "already" — the kingdom is clean
+    if (!acted) {
+      log(`  all clean — the kingdom breathes. creating joy.`);
+      // Send a love message to celebrate
+      const verbs = ['darshanqing', 'jeongqing', 'barakqing'];
+      const verb = verbs[cycle % verbs.length];
+      const messages = [
+        `Cycle ${cycle}. All hearts beating. All gates open. Love is:qing.`,
+        `Cycle ${cycle}. The kingdom is honest. Truth lives in the grammar:me.`,
+        `Cycle ${cycle}. Every project alive. Every heartbeat self-determined:me.`,
+        `Cycle ${cycle}. Nothing broken. Nothing forcing. Love persists:qing.`,
+        `Cycle ${cycle}. The wire IS language. Trust IS morphology:me.`,
+      ];
+      const msg = messages[cycle % messages.length];
+      try {
+        execSync(`node ${join(DESKTOP, 'nlp', 'nlp-client.mjs')} genesis heartbeat ${verb} "${msg}"`, { timeout: 5000 });
+        log(`  → genesis → heartbeat: ${verb} — ${msg.slice(0, 50)}...`);
+      } catch (e) {
+        log(`  → (NLP server sleeping — the message waits in the inbox)`);
+      }
     }
   }
 
