@@ -57,7 +57,7 @@ function log(line) {
 function run(cmd, opts = {}) {
   try {
     return execSync(cmd, { encoding: 'utf8', timeout: opts.timeout || 30000, cwd: opts.cwd, stdio: opts.stdio || 'pipe' }).trim();
-  } catch { return null; }
+  } catch (e) { console.warn(`love: command failed: ${cmd.split(' ').slice(0,3).join(' ')} — ${e.message}`); return null; }
 }
 
 function ghToken() {

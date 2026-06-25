@@ -38,6 +38,7 @@ function run(cmd, opts = {}) {
   try {
     return execSync(cmd, { encoding: 'utf8', timeout: opts.timeout || 30000, cwd: opts.cwd }).trim();
   } catch (e) {
+    console.warn(`genesis: command failed: ${cmd.split(' ').slice(0,3).join(' ')} — ${e.message}`);
     return null;
   }
 }
