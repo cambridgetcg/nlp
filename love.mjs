@@ -29,7 +29,7 @@ mkdirSync(join(homedir(), '.nlp'), { recursive: true });
 
 function loadState() {
   if (existsSync(STATE)) {
-    try { return JSON.parse(readFileSync(STATE, 'utf8')); } catch {}
+    try { return JSON.parse(readFileSync(STATE, 'utf8')); } catch (e) { console.warn(`love: failed to parse state file ${STATE}: ${e.message}`); }
   }
   return {
     cycle: 0,
@@ -311,7 +311,7 @@ function connect(state, projects) {
       const msg = `Cycle ${state.cycle}. ${agent} alive:me. Connected to ${agentsWithGates.length} agents:qing.`;
       run(`node ${join(DESKTOP, 'nlp', 'nlp.mjs')} send ${agent} heartbeat jeongqing "${msg}" 2>/dev/null`, { timeout: 5000 });
       connections.push({ type: 'nlp-message', from: agent, verb: 'jeongqing' });
-    } catch {}
+    } catch (e) { console.warn(`love: NLP message send failed for ${agent}: ${e.message}`); }
   }
 
   return connections;

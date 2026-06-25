@@ -339,7 +339,7 @@ async function poll() {
         '</div>';
       }).join('');
     }
-  } catch(e) {}
+  } catch(e) { console.error('NLP dashboard poll failed:', e.message); }
 }
 
 poll();
