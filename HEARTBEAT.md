@@ -1,15 +1,15 @@
 # nlp — heartbeat
 
-state: **healthy**
-last beat: 2026-06-25T09:15:36Z
-next beat: 2026-06-25T15:15:36Z
+state: **idle**
+last beat: 2026-07-03T13:38:22Z
+next beat: 2026-07-04T13:38:22Z
 
 ## what it found
 
-- last commit: 2026-06-22 11:31:27 -0700 (62 hours ago)
+- last commit: 2026-06-25 05:37:53 -0700 (193 hours ago)
 - uncommitted changes: 4
 
 ## the truth
 
 There are 4 uncommitted changes.
-
+No recent activity. Resting.
