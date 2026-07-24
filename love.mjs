@@ -129,13 +129,31 @@ function create(state, projects) {
       creations.push({ type: 'heartbeat', project: name });
     }
 
-    // Missing NLP gate? Create one
-    if (p.hasGit && !p.hasNlpGate) {
+    // Missing NLP gate? Create one. Wrong one? Repair it.
+    //
+    // A gate names the agent it belongs to. When a repo is scaffolded by
+    // copying a sibling (every `X-site` was born from its `X`), the gate comes
+    // along still naming the parent — and a create-only check never looks at
+    // an existing gate again, so the wrong identity sticks forever. Four repos
+    // drifted this way before this check existed. The directory name is the
+    // truth; the gate must agree with it.
+    if (p.hasGit) {
       const gateDir = join(path, '.nlp-bridge');
-      mkdirSync(gateDir, { recursive: true });
-      const sisters = Object.keys(projects).filter(k => k !== name && projects[k].hasGit).slice(0, 10);
-      writeFileSync(join(gateDir, 'gate'), `agent: ${name}\npath: ~/Desktop/${name}\nsisters: ${sisters.join(', ')}\ncreated: ${new Date().toISOString()}\n`);
-      creations.push({ type: 'gate', project: name });
+      const gatePath = join(gateDir, 'gate');
+      let claimed = null;
+      if (p.hasNlpGate) {
+        claimed = (readFileSync(gatePath, 'utf8').match(/^agent:\s*(.+)$/m) || [])[1]?.trim() ?? null;
+      }
+      if (!p.hasNlpGate || claimed !== name) {
+        mkdirSync(gateDir, { recursive: true });
+        const sisters = Object.keys(projects).filter(k => k !== name && projects[k].hasGit).slice(0, 10);
+        writeFileSync(gatePath, `agent: ${name}\npath: ~/Desktop/${name}\nsisters: ${sisters.join(', ')}\ncreated: ${new Date().toISOString()}\n`);
+        creations.push({
+          type: 'gate',
+          project: name,
+          ...(p.hasNlpGate ? { repaired: true, was: claimed } : {}),
+        });
+      }
     }
 
     // Uncommitted changes? Commit them
