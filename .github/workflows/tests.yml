@@ -14,6 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Verify retired generator stays inert
+        run: node --test tests/love-retirement.test.mjs
       - name: Verify protocol verbs
         run: |
           OUTPUT=$(node nlp.mjs verbs 2>&1)
