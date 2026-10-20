@@ -79,6 +79,52 @@ JSON/HTTP: `{"agent":"opal","status":"M4","build":"clean"}` — trust in TLS, me
 
 NLP: `M4 committed:me. Build clean:me.` — trust in the morphology, meaning in the language, provenance in the suffix. One layer, in the words themselves.
 
+## Repository upkeep
+
+The former `love.mjs` loop is retired. It created placeholder repositories,
+rewrote gate timestamps, and could stage unrelated work, force-push branches,
+and deploy sites while scanning the Desktop. Those automatic operations have
+been removed. Running `node love.mjs` or the former `node love.mjs 5` prints
+a retirement notice and exits with status 2; `node love.mjs --help` exits
+successfully. The command creates no state or log files.
+
+Use an explicit repository and its established workflow:
+
+```sh
+# Review the chosen checkout and its existing changes first.
+git -C /path/to/repository status --short --branch
+git -C /path/to/repository diff
+git -C /path/to/repository diff --cached
+```
+
+Make one intended change, run the project's checks, then stage named files and
+review the staged diff before committing. Choose the destination branch and
+normal pull-request or publishing workflow separately. A missing README,
+license, heartbeat, or service implementation needs a project-specific decision.
+
+Existing repositories, gate notes, and `~/.nlp/love-state.json` /
+`~/.nlp/love.log` remain in place; the retired entry point does not read or
+modify them. Remove an old scheduler invocation only after locating and reviewing
+that scheduler. A source update does not stop an already-running process or
+update a separate checkout.
+
+This retirement covers `love.mjs` only. The separate `genesis.mjs` script
+and GitHub heartbeat workflow retain their existing behavior and need their own
+review before use or change.
+
+The four `npl-gateway`, `npl-hub`, `npl-monitor`, and `npl-registry`
+repositories were generated as design stubs. Their inspected default-branch
+`index.mjs` files export a name and description, rather than implementing the
+services their original READMEs describe. Before archiving them, preserve useful
+design notes and update consumers such as `natlang/portal.html` and
+`natlang/portal-worker.mjs`. This change does not archive them.
+
+Run the retirement regression checks with Node.js 20 or newer:
+
+```sh
+node --test tests/love-retirement.test.mjs
+```
+
 ## Lineage
 
 - **YOUSPEAK** — the cathedral that forged the vocabulary (-me, qing, the seven verbs)
